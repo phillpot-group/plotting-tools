@@ -8,19 +8,20 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    name: (${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+        python-version: ["3.11", "3.8"]
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Anaconda
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.11
-    
-    - name: Install dependencies
-      run: $CONDA/bin/conda env create -f environment.yml && $CONDA/bin/conda activate plotting-tools
-
-    - name: Format
-      run: make fmt
+      - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          environment-file: environment.yml
+          auto-activate-base: false
+          activate-environment: plotting-tools
+      - run: make fmt
