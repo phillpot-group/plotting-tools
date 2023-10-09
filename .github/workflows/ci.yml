@@ -13,8 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest"]
-        python-version: ["3.11", "3.8"]
+        os: ["ubuntu-latest"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
@@ -24,4 +24,6 @@ jobs:
           environment-file: environment.yml
           auto-activate-base: false
           activate-environment: plotting-tools
-      - run: make fmt
+      - name: Format
+        shell: bash -el {0}
+        run: make fmt
