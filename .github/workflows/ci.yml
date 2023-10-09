@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Anaconda
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+    
+    - name: Install dependencies
+      run: $CONDA/bin/conda env create -f environment.yml && $CONDA/bin/conda activate plotting-tools
+
+    - name: Format
+      run: make fmt
