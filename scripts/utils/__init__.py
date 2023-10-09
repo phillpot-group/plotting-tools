@@ -4,7 +4,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
-def discretize_colormap(cmap_name, n_colors):
+def _discretize_colormap(cmap_name, n_colors):
     """
     Returns a matplotlib colormap object.
     Based on this example: www.stackoverflow.com/questions/14777066/matplotlib-discrete-colorbar.
@@ -28,7 +28,7 @@ def discretize_colormap(cmap_name, n_colors):
     return cmap
 
 
-def make_linear_colormap(colors):
+def _make_linear_colormap(colors):
     """
     Returns a matplotlib colormap object.
 
@@ -36,7 +36,7 @@ def make_linear_colormap(colors):
         colors: List of colors to add to the colormap.
 
     Returns:
-        cmap: a matplotlib colormap object.
+        cmap: matplotlib colormap object.
     """
     cmap = mpl.colors.ListedColormap(colors)
     return cmap
@@ -47,9 +47,53 @@ def load_configuration():
     Loads settings from the global configuration file.
 
     Returns:
-        config: Dictionary containing configuration settings.
+        config: dict containing configuration settings.
     """
     CONFIGURATION_FILENAME = "configuration.json"
     with open(CONFIGURATION_FILENAME, "r") as f:
         config = json.load(f)
         return config
+
+
+def process_color_and_cmap_args(args, n_series):
+    """
+    Returns the appropriate colormap from a given set of arguments.
+
+    Args:
+        args: command line arguments.
+        n_series: number of data series.
+
+    Returns:
+        cmap: matplotlib colormap object.
+    """
+    if args.color:
+        cmap = _make_linear_colormap(args.color)
+    else:
+        # Use either tab10 as the default or a named colormap if one is provided.
+        if args.cmap is None:
+            cmap = plt.get_cmap("tab10")
+        else:
+            cmap = _discretize_colormap(args.cmap, n_series)
+    return cmap
+
+
+def process_label_args(args, n_series):
+    """
+    Returns a boolean indicating whether or not to render a legend and a list of labels for each data series.
+
+    Args:
+        args: command line arguments.
+        n_series: number of data series.
+
+    Returns:
+        (render_legend, labels): tuple containing boolean flag to render the legend and a list of data series labels.
+    """
+    render_legend = True
+    # Make the labels an empty list if none are provided.
+    # - this is required for consistent iteration.
+    if args.label:
+        labels = args.label
+    else:
+        render_legend = False
+        labels = ["" for _ in range(n_series)]
+    return (render_legend, labels)

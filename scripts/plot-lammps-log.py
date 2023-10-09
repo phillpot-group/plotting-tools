@@ -1,12 +1,13 @@
 DESCRIPTION = """
-Plots the results of a LAMMPS simulation contained in its log file.
+Plots the data from a LAMMPS simulation log file.
 """
 
 import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import discretize_colormap, load_configuration, make_linear_colormap
+from utils import (load_configuration, process_color_and_cmap_args,
+                   process_label_args)
 
 
 def parse_lammps_log_file(fp, property_names):
@@ -18,7 +19,7 @@ def parse_lammps_log_file(fp, property_names):
         property_names: List of property names.
 
     Returns:
-        (steps, properties): Returns a tuple containing an array of timesteps and a dict of arrays of properties mapped to their names.
+        (steps, properties): tuple containing an array of timesteps and a dict of arrays of properties mapped to their names.
 
     Raises:
         AssertionError: if the 'Step' property is not found in the log file.
@@ -54,22 +55,9 @@ def main(args):
     # Get the total number of data series.
     n_series = len(args.input) * len(args.property)
     # Process the label argument.
-    render_legend = True
-    # Make the labels an empty list if none are provided.
-    # - this is required for consistent iteration.
-    if not args.label:
-        render_legend = False
-        args.label = ["" for _ in range(n_series)]
+    render_legend, labels = process_label_args(args, n_series)
     # Process the color and cmap arguments.
-    if args.color:
-        cmap = make_linear_colormap(args.color)
-    else:
-        # Use either tab10 as the default or a named colormap if one is provided.
-        if args.cmap is None:
-            cmap = plt.get_cmap("tab10")
-        else:
-            cmap = discretize_colormap(args.cmap, n_series)
-
+    cmap = process_color_and_cmap_args(args, n_series)
     # Initialize a combined indexer.
     i = 0
     # Iterate over input files.
@@ -80,7 +68,7 @@ def main(args):
             ax.plot(
                 steps,
                 [prop for prop in properties[prop_name]],
-                label=f"{args.label[i]}",
+                label=f"{labels[i]}",
                 color=cmap(1.0 * i / cmap.N),
             )
             i += 1
