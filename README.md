@@ -89,11 +89,9 @@ python scripts/plot-vasp-neb.py -i <file1> <file2> -c blue green -ls solid dashe
 
 ## Developer Notes
 
-* To keep code style consistent, be sure to run `make fmt` to format the codebase.
+* `make fmt` can be used to format the codebase. This command is run automatically by [GitHub Actions](https://docs.github.com/actions) on every pull request and push.
 
-* Whenever you add a new dependency be sure to run `make exportenv` to update the [`environment.yml`](environment.yml) file so users will be able to build with the most up to date requirements.
-
-* These tasks are automated by [GitHub actions](https://github.com/features/actions) so if you add new functionality that needs to be regularly maintained it is recommended to automate it in the same way.
+* Whenever you add a new dependency be sure to run `make exportenv` to update the [`environment.yml`](environment.yml). This should be done manually before a push so when CI loads the environment from file it is up to date.
 
 ## License
 
