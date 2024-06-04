@@ -6,8 +6,7 @@ import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import (load_configuration, process_color_and_cmap_args,
-                   process_label_args)
+from utils import load_configuration, process_color_and_cmap_args, process_label_args
 
 
 def parse_vasp_neb_file(fp):
@@ -43,7 +42,7 @@ def main(args):
     if args.linestyle:
         linestyles = args.linestyle
     else:
-        linestyles = ["solid" for _ in range(len(args.inputs))]
+        linestyles = ["solid" for _ in range(len(args.input))]
     # Process the color and cmap arguments.
     cmap = process_color_and_cmap_args(args, len(args.input))
     # Iterate over each data series.
