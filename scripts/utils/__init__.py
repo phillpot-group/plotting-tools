@@ -2,6 +2,8 @@ import json
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+from chemfiles import Trajectory
 
 
 def _discretize_colormap(cmap_name, n_colors):
@@ -55,6 +57,34 @@ def load_configuration():
         return config
 
 
+def load_positions_from_lammps_dump_file(filepath, atom_types):
+    """
+    Reads the positions of all relevant atoms from a LAMMPS dump file.
+
+    Returns:
+        (atom_types, positions)
+        atom_types: list of each atom type in order. This order does not change so 
+                    it is given only once - not for each frame. 
+        positions: position of each relevant atom in the trajectory for each frame 
+    """
+    with Trajectory(filepath, mode="r", format="LAMMPS") as trajectory:
+        first_frame = trajectory.read_step(0)
+        relevant_indices = [
+            i for i, atom in enumerate(first_frame.atoms)
+            if atom.type in atom_types
+        ]
+        atom_types = [
+            first_frame.atoms[i].type 
+            for i in relevant_indices
+        ]
+        positions = []
+        print("Extracting atom positions...")
+        for i in tqdm(range(trajectory.nsteps)):
+            frame = trajectory.read_step(i)
+            pos = [frame.positions[i] for i in relevant_indices]
+            positions.append(pos)
+        return atom_types, positions
+
 def process_color_and_cmap_args(args, n_series):
     """
     Returns the appropriate colormap from a given set of arguments.
@@ -97,3 +127,5 @@ def process_label_args(args, n_series):
         render_legend = False
         labels = ["" for _ in range(n_series)]
     return (render_legend, labels)
+
+
